@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  api-gateway:
+    env_file:
+        - ./api-gateway/.env
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - api-network
+    environment:
+      - PORT=${PORT}
+    depends_on:
+      - user-service
+
+  user-service:
+    env_file:
+        - ./user-service/.env
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_DSN=${DB_DSN}
+      - PORT=${PORT}
+    networks:
+      - api-network
+
+networks:
+  api-network:
+    driver: bridge

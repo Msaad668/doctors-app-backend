@@ -6,9 +6,11 @@ import (
 	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -24,25 +26,34 @@ func initLogger() {
     log.SetReportCaller(true)
 }
 
+
+
 func main() {
+    _ = godotenv.Load()
 	initLogger()
 
     router := gin.Default()
 
     router.GET("/health", healthCheck)
-    router.POST("/createAccount", createAccount)
+    router.POST("/create_doctor_account", createDoctorAccount)
     router.POST("/login", loginUser)
     router.PUT("/updateUser/:userID", updateUser) // New route for updating user data
 
-    router.Run(":8080")
+    port := os.Getenv("PORT") // Fetch port from environment variable
+	if port == "" {
+		port = "8080" // Default to port 8080 if not specified
+		log.Warn("Defaulting to port 8080")
+	}
+
+	router.Run(":" + port) // Use the port
 }
 
 func healthCheck(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"status": "UP"})
 }
 
-func createAccount(c *gin.Context) {
-    serviceProxyWithServiceName(c, "user", "/createAccount")
+func createDoctorAccount(c *gin.Context) {
+    serviceProxyWithServiceName(c, "user", "/signup/doctor")
 }
 
 func loginUser(c *gin.Context) {
